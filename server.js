@@ -26,9 +26,9 @@ app.post('/api/login', async (req, res) => {
     };
 
     console.log(data);
-
     setDoc(doc(db, 'users', userId), data, { merge: true });
 
 });
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
+
