@@ -12,6 +12,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 var userId;
+
 app.post('/api/login', async (req, res) => {
     const responseData = { message: 'User data received successfully' };
     res.status(200).json(responseData);
