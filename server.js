@@ -38,9 +38,9 @@ app.get('/api/getSubmissionCalendar/:username', async (req, res) => {
 
     try {
         const response = await axios.get(url);
-        const submissionCalendar = response.data.submissionCalendar;
+        const leetcodeData = response.data;
         
-        res.status(200).json({ submissionCalendar: submissionCalendar });
+        res.status(200).json({ leetcodeData: leetcodeData });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error retrieving submission calendar' });
