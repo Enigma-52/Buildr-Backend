@@ -47,5 +47,27 @@ app.get('/api/getSubmissionCalendar/:username', async (req, res) => {
     }
 });
 
+
+app.post('/api/submitProfileDetails', async (req, res) => {
+    const { userId, personalInfo, socialLinks } = req.body;
+  
+    const data = {
+      userId,
+      personalInfo,
+      socialLinks
+    };
+  
+    try {
+      console.log(data);
+      res.status(200).json({ message: 'Profile details submitted successfully' });
+    } catch (error) {
+      console.error('Error saving data:', error);
+      res.status(500).json({ message: 'Error saving profile details' });
+    }
+  });
+
+
+
+
 app.listen(port, () => console.log(`Server listening on port ${port}`));
 
