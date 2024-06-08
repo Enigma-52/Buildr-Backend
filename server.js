@@ -1,4 +1,5 @@
 import firebase from './firebaseConfig.js';
+import axios from 'axios';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from "cors";
@@ -29,6 +30,21 @@ app.post('/api/login', async (req, res) => {
     console.log(data);
     setDoc(doc(db, 'users', userId), data, { merge: true });
 
+});
+
+app.get('/api/getSubmissionCalendar/:username', async (req, res) => {
+    const username = req.params.username;
+    const url = `https://leetcode-api-faisalshohag.vercel.app/${username}`;
+
+    try {
+        const response = await axios.get(url);
+        const submissionCalendar = response.data.submissionCalendar;
+        
+        res.status(200).json({ submissionCalendar: submissionCalendar });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error retrieving submission calendar' });
+    }
 });
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
