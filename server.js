@@ -4,6 +4,13 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from "cors";
 
+import Razorpay from 'razorpay';
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
 const { db, doc, setDoc,getDocs } = firebase;
 
 const app = express();
@@ -65,6 +72,35 @@ app.post('/api/submitProfileDetails', async (req, res) => {
       res.status(500).json({ message: 'Error saving profile details' });
     }
   });
+
+  app.post('/createPayment', async (req, res) => {
+    const { amount, currency, receipt } = req.body;
+    try {
+        const order = await razorpay.orders.create({
+            amount: amount * 100,
+            currency,
+            receipt
+        });
+  
+        res.json({ orderId: order.id, amount: order.amount });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).send('Error creating order');
+    }
+  });
+  
+  app.post('/paymentSuccess', async (req, res) => {
+    const { orderId, paymentId, signature } = req.body;
+  
+    const generatedSignature = crypto.createHmac('sha256', 'RAZORPAY_KEY_SECRET').update(orderId + '|' + paymentId).digest('hex');
+    if (generatedSignature === signature) {
+  
+        res.send('Payment successful');
+    } else {
+        res.send('Payment failed');
+    }
+  });
+  
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
 
