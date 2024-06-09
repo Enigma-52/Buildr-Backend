@@ -4,7 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from "cors";
 
-const { db, doc, setDoc, getDocs, collection, firebaseConfig } = firebase;
+const { db, doc, setDoc,getDocs } = firebase;
 
 const app = express();
 const port = process.env.PORT || 5000; 
@@ -65,9 +65,6 @@ app.post('/api/submitProfileDetails', async (req, res) => {
       res.status(500).json({ message: 'Error saving profile details' });
     }
   });
-
-
-
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
 
