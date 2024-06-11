@@ -100,6 +100,27 @@ app.post('/api/submitProfileDetails', async (req, res) => {
         res.send('Payment failed');
     }
   });
+
+  app.post('/api/buildrUsername', (req, res) => {
+    try {
+        const { userId, username } = req.body;
+
+        const data = {
+            userId: userId,
+            username: username
+        };
+
+        console.log(data);
+
+        setDoc(doc(db, 'users', userId), data, { merge: true });
+        
+        res.status(200).send({ message: 'Username updated successfully' });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send({ error: 'An internal server error occurred' });
+    }
+});
+
   
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
