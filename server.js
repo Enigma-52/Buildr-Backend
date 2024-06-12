@@ -12,8 +12,6 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-
-
 const app = express();
 const port = process.env.PORT || 5000; 
 
