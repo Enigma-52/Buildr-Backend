@@ -3,15 +3,16 @@ import axios from 'axios';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from "cors";
-
 import Razorpay from 'razorpay';
+
+const { db, doc, setDoc,getDocs } = firebase;
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-const { db, doc, setDoc,getDocs } = firebase;
+
 
 const app = express();
 const port = process.env.PORT || 5000; 
