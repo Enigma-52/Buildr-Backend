@@ -9,7 +9,8 @@ const {
     db,
     doc,
     setDoc,
-    getDocs
+    getDocs,
+    collection
 } = firebase;
 
 const razorpay = new Razorpay({
@@ -158,6 +159,31 @@ app.post('/api/buildrUsername', (req, res) => {
         res.status(500).send({
             error: 'An internal server error occurred'
         });
+    }
+});
+
+app.get('/api/getUsername', async (req, res) => {
+    const userId = req.query.userId;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    try {
+        const usersCollectionRef = collection(db, 'users');
+        const querySnapshot = await getDocs(usersCollectionRef);
+        const userDoc = querySnapshot.docs.find(doc => doc.id === userId);
+
+        if (!userDoc) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        console.log(userData.username);
+        res.json({ username: userData.username });
+    } catch (error) {
+        console.error('Error fetching username:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
