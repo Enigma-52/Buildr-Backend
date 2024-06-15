@@ -75,6 +75,8 @@ app.post('/api/submitProfileDetails', async (req, res) => {
         socialLinks
     } = req.body;
 
+    console.log(req.body);
+
     const data = {
         userId,
         personalInfo,
@@ -82,7 +84,6 @@ app.post('/api/submitProfileDetails', async (req, res) => {
     };
 
     try {
-        console.log(data);
         res.status(200).json({
             message: 'Profile details submitted successfully'
         });
