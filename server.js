@@ -72,18 +72,25 @@ app.post('/api/submitProfileDetails', async (req, res) => {
     const {
         userId,
         personalInfo,
-        socialLinks
+        socialLinks,
+        education,
+        workExperience,
+        projects,
     } = req.body;
-
-    console.log(req.body);
 
     const data = {
         userId,
         personalInfo,
-        socialLinks
+        socialLinks,
+        education,
+        workExperience,
+        projects,
     };
 
     try {
+        setDoc(doc(db, 'users', userId), data, {
+            merge: true
+        });
         res.status(200).json({
             message: 'Profile details submitted successfully'
         });
