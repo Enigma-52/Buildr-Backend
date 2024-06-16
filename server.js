@@ -3,7 +3,10 @@ import axios from 'axios';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from "cors";
+import fs from "fs";
+import multer from "multer";
 import Razorpay from 'razorpay';
+import path from "path";
 
 const {
     db,
@@ -20,6 +23,22 @@ const razorpay = new Razorpay({
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+      cb(null, `${req.body.userId}-${Date.now()}${path.extname(file.originalname)}`);
+    },
+  });
+  
+  const upload = multer({ storage });
+  
+  // Create the uploads directory if it doesn't exist
+  if (!fs.existsSync('uploads')) {
+    fs.mkdirSync('uploads');
+  }
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -193,6 +212,17 @@ app.get('/api/getUsername', async (req, res) => {
         console.error('Error fetching username:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+
+app.post('/api/uploadProfilePicture', upload.single('file'), (req, res) => {
+    const userId = req.body.userId;
+    const file = req.file;
+  
+    if (!file) {
+      return res.status(400).send('No file uploaded');
+    }
+  
+    res.send('File uploaded successfully');
 });
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
