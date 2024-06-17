@@ -247,4 +247,24 @@ app.post('/api/uploadProfilePicture', upload.single('file'), async (req, res) =>
     }
 });
 
+app.get('/api/getProfilePicture/:userId', async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const usersCollectionRef = collection(db, 'users');
+        const querySnapshot = await getDocs(usersCollectionRef);
+        const userDoc = querySnapshot.docs.find(doc => doc.id === userId);
+
+        if (!userDoc) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        res.json({ data : userData });
+    } catch (error) {
+      console.error('Error fetching profile picture:', error);
+      res.status(500).json({ error: 'Failed to fetch profile picture' });
+    }
+  });
+  
+
 app.listen(port, () => console.log(`Server listening on port ${port}`));
