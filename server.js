@@ -7,6 +7,7 @@ import fs from "fs";
 import multer from "multer";
 import Razorpay from 'razorpay';
 import path from "path";
+import bucket from './firebaseAdmin.js';
 
 const {
     db,
@@ -24,21 +25,8 @@ const razorpay = new Razorpay({
 const app = express();
 const port = process.env.PORT || 5000;
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-      cb(null, `${req.body.userId}-${Date.now()}${path.extname(file.originalname)}`);
-    },
-  });
-  
-  const upload = multer({ storage });
-  
-  // Create the uploads directory if it doesn't exist
-  if (!fs.existsSync('uploads')) {
-    fs.mkdirSync('uploads');
-  }
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -214,15 +202,49 @@ app.get('/api/getUsername', async (req, res) => {
     }
 });
 
-app.post('/api/uploadProfilePicture', upload.single('file'), (req, res) => {
-    const userId = req.body.userId;
-    const file = req.file;
+app.post('/api/uploadProfilePicture', upload.single('file'), async (req, res) => {
+    try {
+      const file = req.file;
+      const userId = req.body.userId;
   
-    if (!file) {
-      return res.status(400).send('No file uploaded');
+      if (!file) {
+        return res.status(400).send('No file uploaded');
+      }
+  
+      const filename = `${userId}-${Date.now()}${path.extname(file.originalname)}`;
+      const fileUpload = bucket.file(filename);
+  
+      const stream = fileUpload.createWriteStream({
+        metadata: {
+          contentType: file.mimetype,
+        },
+      });
+  
+      stream.on('error', (error) => {
+        console.error('Upload error:', error);
+        res.status(500).send('Upload error');
+      });
+  
+      stream.on('finish', async () => {
+        try {
+          await fileUpload.makePublic();
+          const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
+
+          const userDocRef = doc(db, 'users', userId);
+          await setDoc(userDocRef, { profilePictureUrl: publicUrl }, { merge: true });
+
+          res.status(200).json({ url: publicUrl });
+        } catch (error) {
+          console.error('Error making file public:', error);
+          res.status(500).send('Error making file public');
+        }
+      });
+  
+      stream.end(file.buffer);
+    } catch (error) {
+      console.error('Upload error:', error);
+      res.status(500).send('Upload error');
     }
-  
-    res.send('File uploaded successfully');
 });
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));

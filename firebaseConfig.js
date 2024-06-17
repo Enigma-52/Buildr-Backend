@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc , getDocs ,collection} from 'firebase/firestore';
 import { GoogleAuthProvider, signInWithPopup,getAuth , signOut} from 'firebase/auth';
-
+import bucket from './firebaseAdmin.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
