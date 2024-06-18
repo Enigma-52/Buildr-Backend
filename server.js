@@ -37,6 +37,7 @@ app.post('/api/login', async (req, res) => {
     const responseData = {
         message: 'User data received successfully'
     };
+    
     res.status(200).json(responseData);
 
     userId = req.body.uid;
