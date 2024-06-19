@@ -8,6 +8,7 @@ import multer from "multer";
 import Razorpay from 'razorpay';
 import path from "path";
 import bucket from './firebaseAdmin.js';
+import crypto from 'crypto';
 
 const {
     db,
@@ -39,7 +40,6 @@ app.post('/api/login', async (req, res) => {
     };
     
     res.status(200).json(responseData);
-
     userId = req.body.uid;
 
     const data = {
@@ -63,10 +63,10 @@ app.get('/api/getSubmissionCalendar/:username', async (req, res) => {
     try {
         const response = await axios.get(url);
         const leetcodeData = response.data;
-
         res.status(200).json({
             leetcodeData: leetcodeData
         });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -134,18 +134,26 @@ app.post('/createPayment', async (req, res) => {
 });
 
 app.post('/paymentSuccess', async (req, res) => {
-    const {
-        orderId,
-        paymentId,
-        signature
-    } = req.body;
+    try {
+        const { orderId, paymentId, signature } = req.body;
 
-    const generatedSignature = crypto.createHmac('sha256', 'RAZORPAY_KEY_SECRET').update(orderId + '|' + paymentId).digest('hex');
-    if (generatedSignature === signature) {
+        console.log(req.body);
 
-        res.send('Payment successful');
-    } else {
-        res.send('Payment failed');
+        const generatedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(orderId + '|' + paymentId)
+            .digest('hex');
+
+        console.log(generatedSignature);
+
+        if (generatedSignature === signature) {
+            res.status(200).json({ message: 'Payment successful' });
+        } else {
+            res.status(400).json({ message: 'Payment failed' });
+        }
+    } catch (error) {
+        console.error('Error processing payment:', error);
+        res.status(500).send('Server error');
     }
 });
 
@@ -265,7 +273,23 @@ app.get('/api/getProfilePicture/:userId', async (req, res) => {
       console.error('Error fetching profile picture:', error);
       res.status(500).json({ error: 'Failed to fetch profile picture' });
     }
-  });
+});
+
+app.get('/api/user/:username', (req, res) => {
+    let users = [
+        { username: 'rohit', name: 'Rohit Sharma', email: 'rohit@example.com' },
+        { username: 'john', name: 'John Doe', email: 'john@example.com' },
+      ];
+
+    const username = req.params.username;
+    const user = users.find(user => user.username === username);
+  
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+  
+    res.json(user);
+});
   
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
