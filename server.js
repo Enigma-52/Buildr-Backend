@@ -116,6 +116,7 @@ app.post('/createPayment', async (req, res) => {
         currency,
         receipt
     } = req.body;
+    
     try {
         const order = await razorpay.orders.create({
             amount: amount * 100,
