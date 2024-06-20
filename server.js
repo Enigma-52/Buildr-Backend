@@ -143,8 +143,6 @@ app.post('/paymentSuccess', async (req, res) => {
             .update(orderId + '|' + paymentId)
             .digest('hex');
 
-        console.log(generatedSignature);
-
         if (generatedSignature === signature) {
             res.status(200).json({ message: 'Payment successful' });
         } else {
