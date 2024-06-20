@@ -116,7 +116,7 @@ app.post('/createPayment', async (req, res) => {
         currency,
         receipt
     } = req.body;
-    
+
     try {
         const order = await razorpay.orders.create({
             amount: amount * 100,
@@ -137,8 +137,6 @@ app.post('/createPayment', async (req, res) => {
 app.post('/paymentSuccess', async (req, res) => {
     try {
         const { orderId, paymentId, signature } = req.body;
-
-        console.log(req.body);
 
         const generatedSignature = crypto
             .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
