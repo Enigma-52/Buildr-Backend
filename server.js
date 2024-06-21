@@ -46,7 +46,8 @@ app.post('/api/login', async (req, res) => {
         userId: userId,
         email: req.body.email,
         photoURL: req.body.photoURL,
-        displayName: req.body.displayName
+        displayName: req.body.displayName,
+        paid: "false" //needs a previous data checker
     };
 
     console.log(data);
@@ -183,6 +184,34 @@ app.post('/api/buildrUsername', (req, res) => {
     }
 });
 
+app.get('/api/paidStatus/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    try {
+        const usersCollectionRef = collection(db, 'users');
+        const querySnapshot = await getDocs(usersCollectionRef);
+        const userDoc = querySnapshot.docs.find(doc => doc.id === userId);
+
+        if (!userDoc) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        const data = {
+            paidStatus : userData.paid, 
+            username : userData.username
+        };
+        res.json({ data: data });
+    } catch (error) {
+        console.error('Error fetching username:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 app.get('/api/getUsername', async (req, res) => {
     const userId = req.query.userId;
 
@@ -287,6 +316,5 @@ app.get('/api/user/:username', (req, res) => {
   
     res.json(user);
 });
-  
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
