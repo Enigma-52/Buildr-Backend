@@ -42,12 +42,17 @@ app.post('/api/login', async (req, res) => {
     res.status(200).json(responseData);
     userId = req.body.uid;
 
+    const usersCollectionRef = collection(db, 'users');
+    const querySnapshot = await getDocs(usersCollectionRef);
+    const userDoc = querySnapshot.docs.find(doc => doc.id === userId);
+    const userData = userDoc ? userDoc.data() : {};
+    
     const data = {
         userId: userId,
         email: req.body.email,
         photoURL: req.body.photoURL,
         displayName: req.body.displayName,
-        paid: "false" //needs a previous data checker
+        paid: userData.paid !== undefined ? userData.paid : "false"
     };
 
     console.log(data);
@@ -62,7 +67,7 @@ app.get('/api/getSubmissionCalendar/:username', async (req, res) => {
     const url = `https://leetcode-api-faisalshohag.vercel.app/${username}`;
 
     try {
-        const response = await axios.get(url);
+        const response = await axios.get(url)
         const leetcodeData = response.data;
         res.status(200).json({
             leetcodeData: leetcodeData
@@ -76,6 +81,9 @@ app.get('/api/getSubmissionCalendar/:username', async (req, res) => {
     }
 });
 
+app.post('/api/postSubmission' , async (req,res) => {
+    console.error()
+});
 
 app.post('/api/submitProfileDetails', async (req, res) => {
     const {
@@ -184,8 +192,8 @@ app.post('/api/buildrUsername', (req, res) => {
     }
 });
 
-app.get('/api/paidStatus/:userId', async (req, res) => {
-    const userId = req.params.userId;
+app.get('/api/paidStatus', async (req, res) => {
+    const userId = req.query.userId;
 
     if (!userId) {
         return res.status(400).json({ error: 'User ID is required' });
@@ -205,7 +213,9 @@ app.get('/api/paidStatus/:userId', async (req, res) => {
             paidStatus : userData.paid, 
             username : userData.username
         };
-        res.json({ data: data });
+        console.log("PAID STATUS");
+        console.log(data);
+        res.json(data);
     } catch (error) {
         console.error('Error fetching username:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -230,7 +240,10 @@ app.get('/api/getUsername', async (req, res) => {
 
         const userData = userDoc.data();
         console.log(userData.username);
-        res.json({ username: userData.username });
+        const data ={
+            username : userData.username
+        }
+        res.json(data);
     } catch (error) {
         console.error('Error fetching username:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -303,7 +316,7 @@ app.get('/api/getProfilePicture/:userId', async (req, res) => {
 
 app.get('/api/user/:username', (req, res) => {
     let users = [
-        { username: 'rohit', name: 'Rohit Sharma', email: 'rohit@example.com' },
+        { username: 'desiredUsername', name: 'Rohit Sharma', email: 'rohit@example.com' },
         { username: 'john', name: 'John Doe', email: 'john@example.com' },
       ];
 
@@ -315,6 +328,25 @@ app.get('/api/user/:username', (req, res) => {
     }
   
     res.json(user);
+});
+
+app.post('/api/updatePaidStatus', async (req, res) => {
+    const userId = req.query.userId;
+
+    try {
+        const data = {
+            paid: "true"
+        };
+    
+        setDoc(doc(db, 'users', userId), data, {
+            merge: true
+        });
+
+        res.json({ success: true, message: 'Paid status updated successfully' });
+    } catch (error) {
+        console.error('Error updating paid status:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
