@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc , getDocs ,collection} from 'firebase/firestore';
+import { getFirestore, doc, setDoc , getDocs ,collection , query , where} from 'firebase/firestore';
 import { GoogleAuthProvider, signInWithPopup,getAuth , signOut} from 'firebase/auth';
 import bucket from './firebaseAdmin.js';
 import dotenv from 'dotenv';
@@ -19,4 +19,4 @@ const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 const auth = getAuth(firebaseApp);
 
-export default { firebaseConfig,firebaseApp, db, doc , setDoc ,getFirestore, getDocs, collection, auth, GoogleAuthProvider, signInWithPopup,};
+export default { firebaseConfig,firebaseApp, db, doc , setDoc ,getFirestore, getDocs, collection, auth, GoogleAuthProvider, signInWithPopup,query , where};

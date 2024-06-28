@@ -15,7 +15,9 @@ const {
     doc,
     setDoc,
     getDocs,
-    collection
+    collection,
+    query,
+    where
 } = firebase;
 
 const razorpay = new Razorpay({
@@ -52,7 +54,23 @@ app.post('/api/login', async (req, res) => {
         email: req.body.email,
         photoURL: req.body.photoURL,
         displayName: req.body.displayName,
-        paid: userData.paid !== undefined ? userData.paid : "false"
+        paid: userData.paid !== undefined ? userData.paid : "false",
+        personalInfo: {
+            bio: userData.personalInfo?.bio || '',
+            email: userData.personalInfo?.email || '',
+            location: userData.personalInfo?.location || '',
+            name: userData.personalInfo?.name || '',
+        },
+        socialLinks: {
+            github: userData.socialLinks?.github || '',
+            leetcode: userData.socialLinks?.leetcode || '',
+            linkedin: userData.socialLinks?.linkedin || '',
+            other: userData.socilLinks?.other || '',
+            twitter: userData.socialLinks?.twitter || '',
+        },
+        education: userData?.education || [],
+        projects: userData?.projects || [],
+        workExperience: userData?.workExperience || [],
     };
 
     console.log(data);
@@ -314,20 +332,28 @@ app.get('/api/getProfilePicture/:userId', async (req, res) => {
     }
 });
 
-app.get('/api/user/:username', (req, res) => {
-    let users = [
-        { username: 'desiredUsername', name: 'Rohit Sharma', email: 'rohit@example.com' },
-        { username: 'john', name: 'John Doe', email: 'john@example.com' },
-      ];
+app.get('/api/user/:username', async (req, res) => {
+    try {
+        const username = req.params.username;
+        const usersCollectionRef = collection(db, 'users');
+        
+        const q = query(usersCollectionRef, where('username', '==', username));
+        const querySnapshot = await getDocs(q);
 
-    const username = req.params.username;
-    const user = users.find(user => user.username === username);
-  
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+        if (querySnapshot.empty) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const userData = querySnapshot.docs[0].data();
+        
+        console.log("ALL DATA");
+        console.log(userData);
+
+        res.json(userData);
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-  
-    res.json(user);
 });
 
 app.post('/api/updatePaidStatus', async (req, res) => {
@@ -348,5 +374,40 @@ app.post('/api/updatePaidStatus', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+app.get('/api/checkUsername/:username', async (req, res) => {
+    const { username } = req.params;
+    const userId = req.query.userId; 
+    console.log();
+    try {
+      const usersCollectionRef = collection(db, 'users');
+      const querySnapshot = await getDocs(usersCollectionRef);
+  
+      let isUsernameUnique = true;
+  
+      querySnapshot.forEach(doc => {
+        const userData = doc.data();
+        if (userData.username === username) {
+          if (userData.userId === userId) {
+            isUsernameUnique = true;
+          }
+          else{
+            isUsernameUnique = false;
+          }
+        }
+      });
+  
+      if (isUsernameUnique) {
+        return res.json({ unique: true});
+      } else {
+        return res.json({ unique: false});
+      }
+    } catch (error) {
+      console.error('Error checking username uniqueness:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+  
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
