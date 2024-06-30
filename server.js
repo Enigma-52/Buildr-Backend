@@ -313,9 +313,9 @@ app.post('/api/uploadProfilePicture', upload.single('file'), async (req, res) =>
     }
 });
 
-app.get('/api/getProfilePicture/:userId', async (req, res) => {
+app.get('/api/getProfilePicture', async (req, res) => {
     try {
-      const userId = req.params.userId;
+      const userId = req.query.userId;
       const usersCollectionRef = collection(db, 'users');
         const querySnapshot = await getDocs(usersCollectionRef);
         const userDoc = querySnapshot.docs.find(doc => doc.id === userId);
