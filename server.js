@@ -36,6 +36,14 @@ app.use(bodyParser.json());
 
 var userId;
 
+app.get('/api/health', async (req, res) => {
+    console.log("Health Status 200");
+    res.status(200).json({
+        health: "All Good!"
+    });
+});
+
+
 app.post('/api/login', async (req, res) => {
     const responseData = {
         message: 'User data received successfully'
