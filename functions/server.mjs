@@ -26,7 +26,7 @@ const razorpay = new Razorpay({
 });
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = 5000;
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -419,3 +419,5 @@ app.get('/api/checkUsername/:username', async (req, res) => {
   
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
+
+export default app;
